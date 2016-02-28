@@ -22,11 +22,11 @@ public class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    //@Rollback(false)
+    @Rollback(false)
     public void testSave() {
         User user = new User();
         user.setUsername("admin");
-        user.setPassword("admin");
+        user.setPassword("$2a$04$fCqcakHV2O.4AJgp3CIAGO9l5ZBq61Gt6YNzjcyC8M.js0ucpyun.");//admin
         userRepository.save(user);
     }
 

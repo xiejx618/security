@@ -30,6 +30,9 @@
         <c:url value="/except/kaptcha" var="kaptcha"/>
         <input type="text" id="kaptcha" name="kaptcha"/><img src="${kaptcha}" width="80" height="25"/>
     </p>
+    <p>
+        <input type="checkbox" name="remember-me" value="true"/>Remember me
+    </p>
     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
     <button type="submit" class="btn">Log in</button>
 </form>

@@ -7,6 +7,7 @@
 </head>
 <body>
 <form action="save" method="post">
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
     <c:if test="${action=='update'}"><div>用户ID:${user.id}<input type="hidden" value="${user.id}" name="id"></div></c:if>
     <div>用户名:<input type="text" value="${user.username}" name="username"/></div>
     <div>密码:<input type="text" value="${user.password}" name="password"/></div>

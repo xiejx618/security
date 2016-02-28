@@ -9,12 +9,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.authentication.PasswordEncoderParser;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
@@ -32,10 +36,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         messageSource.setBasename("classpath:org/springframework/security/messages");
         return messageSource;
     }
+    @Bean
+    public UserDetailsService userDetailsService(){
+        return new CustomUserDetailsService(userService);
+    }
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        //这里的strength为4-31位,设置成16都觉得编码有点慢了
+        PasswordEncoder passwordEncoder=new BCryptPasswordEncoder(4);
+        return passwordEncoder;
+    }
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        UserDetailsService userDetailsService=new CustomUserDetailsService(userService);
-        AuthenticationProvider authenticationProvider=new CustomAuthenticationProvider(userDetailsService,userService);
+        DaoAuthenticationProvider authenticationProvider=new CustomAuthenticationProvider(userDetailsService(),userService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
         auth.authenticationProvider(authenticationProvider);
     }
 
@@ -47,9 +61,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.addFilterBefore(new KaptchaAuthenticationFilter("/login", "/login?error"), UsernamePasswordAuthenticationFilter.class)
-                .csrf().disable()
                 .authorizeRequests().anyRequest().authenticated()
                 .and().formLogin().loginPage("/login").failureUrl("/login?error").usernameParameter("username").passwordParameter("password").permitAll()
-                .and().logout().logoutUrl("/logout").permitAll();
+                .and().logout().logoutUrl("/logout").permitAll()
+                .and().rememberMe().key("9D119EE5A2B7DAF6B4DC1EF871D0AC3C");
     }
 }
