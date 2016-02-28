@@ -10,10 +10,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <slf4j.version>1.7.7</slf4j.version>
+        <commons.pool2.version>2.4.2</commons.pool2.version>
         <spring.version>4.2.5.RELEASE</spring.version>
         <hibernate.version>5.1.0.Final</hibernate.version>
         <spring.security.version>4.0.4.RELEASE</spring.security.version>
         <spring.data.jpa.version>1.9.4.RELEASE</spring.data.jpa.version>
+        <spring.data.redis.version>1.6.4.RELEASE</spring.data.redis.version>
+        <spring.session.version>1.1.0.RELEASE</spring.session.version>
         <jetty.version>9.3.3.v20150827</jetty.version>
     </properties>
     <build>
@@ -106,7 +109,36 @@
             <artifactId>spring-data-jpa</artifactId>
             <version>${spring.data.jpa.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-oxm</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
+            <version>${spring.data.redis.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+            <version>${commons.pool2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>2.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session</artifactId>
+            <version>${spring.session.version}</version>
+        </dependency>
         <dependency>
             <groupId>c3p0</groupId>
             <artifactId>c3p0</artifactId>
@@ -150,7 +182,6 @@
             <version>2.2.5</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
@@ -163,5 +194,12 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-maven-plugin</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+
+
     </dependencies>
 </project>

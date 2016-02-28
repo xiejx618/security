@@ -410,6 +410,114 @@ ${pageContext.request.remoteUser}这样可以获取当前登录的用户名.jsp�
 <sec:authorize access="isFullyAuthenticated()">${pageContext.request.remoteUser},欢迎你通过用户名/密码到首页!</sec:authorize></span>
 <sec:authorize access="hasAuthority('USER_QUERY')">你有USER_QUERY权限</sec:authorize>
 ```
+五.session并发控制与集成Spring Session
+session并发控制
+1.注册SessionRegistry Bean
+```java
+@Bean
+public SessionRegistry sessionRegistry(){
+    return new SessionRegistryImpl();
+}
+```
+2.配置并发管理
+```java
+@Override
+protected void configure(HttpSecurity http) throws Exception {
+    http.addFilterBefore(new KaptchaAuthenticationFilter("/login", "/login?error"), UsernamePasswordAuthenticationFilter.class)
+            .authorizeRequests().anyRequest().authenticated()
+            .and().formLogin().loginPage("/login").failureUrl("/login?error").usernameParameter("username").passwordParameter("password").permitAll()
+            .and().logout().logoutUrl("/logout").permitAll()
+            .and().rememberMe().key("9D119EE5A2B7DAF6B4DC1EF871D0AC3C")
+            .and().exceptionHandling().accessDeniedPage("/except/403")
+            .and().sessionManagement().maximumSessions(2).expiredUrl("/login?expired").sessionRegistry(sessionRegistry());
+}
+```
+3.SessionRegistry获取所需信息
+```java
+@Autowired
+private SessionRegistry sessionRegistry;
+@RequestMapping("/")
+public String index(Model model){
+    int numOfUsers=sessionRegistry.getAllPrincipals().size();
+    model.addAttribute("numOfUsers",numOfUsers);
+    return "index";
+}
+```
+下面继续看看集成SpringSession
+1.加入主要依赖
+```xml
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-oxm</artifactId>
+    <version>${spring.version}</version>
+</dependency>
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-context-support</artifactId>
+    <version>${spring.version}</version>
+</dependency>
+<dependency>
+    <groupId>org.springframework.data</groupId>
+    <artifactId>spring-data-redis</artifactId>
+    <version>${spring.data.redis.version}</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-pool2</artifactId>
+    <version>${commons.pool2.version}</version>
+</dependency>
+<dependency>
+    <groupId>redis.clients</groupId>
+    <artifactId>jedis</artifactId>
+    <version>2.5.2</version>
+</dependency>
+<dependency>
+    <groupId>org.springframework.session</groupId>
+    <artifactId>spring-session</artifactId>
+    <version>${spring.session.version}</version>
+</dependency>
+```
+2.启用EnableRedisHttpSession,并配置一个连接工厂,并将此配置加到RootApplicationContext
+```java
+package org.exam.config;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
+@Configuration
+@EnableRedisHttpSession
+public class HttpSessionConfig {
+    @Bean
+    public JedisConnectionFactory jedisConnectionFactory() {
+        return new JedisConnectionFactory();
+    }
+}
+```
+```java
+@Override
+protected Class<?>[] getRootConfigClasses() {
+    return new Class<?>[]{AppConfig.class,HttpSessionConfig.class,SecurityConfig.class,MvcConfig.class};
+}
+```
+3.配置springSessionRepositoryFilter.并确保springSessionRepositoryFilter要比springSecurityFilterChain靠前
+```java
+package org.exam.config;
 
+import org.springframework.core.annotation.Order;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.session.web.context.AbstractHttpSessionApplicationInitializer;
 
+import javax.servlet.ServletContext;
+@Order(99)
+public class HttpSessionApplicationInitializer extends AbstractHttpSessionApplicationInitializer {
+    @Override
+    protected void afterSessionRepositoryFilter(ServletContext servletContext) {
+        servletContext.addListener(new HttpSessionEventPublisher());
+    }
+}
+```
+5.启动redis测试
+redis:
+a.查询所有key:keys命令,keys *
+b.根据某个key删除,使用del命令

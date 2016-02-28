@@ -17,6 +17,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -58,6 +60,11 @@ public class SecurityConfig {
             return super.authenticationManagerBean();
         }
 
+        @Bean
+        public SessionRegistry sessionRegistry(){
+            return new SessionRegistryImpl();
+        }
+
         @Override
         protected void configure(AuthenticationManagerBuilder auth) throws Exception {
             DaoAuthenticationProvider authenticationProvider = new CustomAuthenticationProvider(userDetailsService(), userService);
@@ -77,7 +84,8 @@ public class SecurityConfig {
                     .and().formLogin().loginPage("/login").failureUrl("/login?error").usernameParameter("username").passwordParameter("password").permitAll()
                     .and().logout().logoutUrl("/logout").permitAll()
                     .and().rememberMe().key("9D119EE5A2B7DAF6B4DC1EF871D0AC3C")
-                    .and().exceptionHandling().accessDeniedPage("/except/403");
+                    .and().exceptionHandling().accessDeniedPage("/except/403")
+                    .and().sessionManagement().maximumSessions(2).expiredUrl("/login?expired").sessionRegistry(sessionRegistry());
         }
     }
 
