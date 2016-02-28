@@ -403,4 +403,13 @@ public interface UserService {
 @PreAuthorize("#c.name == authentication.name")
 public void doSomething(@P("c")Contact contact);
 
+四.页面使用权限进行控制显示(与启用全局方法安全无关)
+${pageContext.request.remoteUser}这样可以获取当前登录的用户名.jsp页面要根据权限来显示页面元素,可以先引入spring-security-taglibs包,再使用spring security标签就可以.下面是使用例子
+```html
+<sec:authorize access="isRememberMe()">欢迎你通过记住我登录到首页!</sec:authorize>
+<sec:authorize access="isFullyAuthenticated()">${pageContext.request.remoteUser},欢迎你通过用户名/密码到首页!</sec:authorize></span>
+<sec:authorize access="hasAuthority('USER_QUERY')">你有USER_QUERY权限</sec:authorize>
+```
+
+
 
