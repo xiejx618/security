@@ -21,10 +21,14 @@
         <label for="username">Username</label>
         <input type="text" id="username" name="username"/>
     </p>
-
     <p>
         <label for="password">Password</label>
         <input type="password" id="password" name="password"/>
+    </p>
+    <p>
+        <label for="kaptcha">Kaptcha</label>
+        <c:url value="/except/kaptcha" var="kaptcha"/>
+        <input type="text" id="kaptcha" name="kaptcha"/><img src="${kaptcha}" width="80" height="25"/>
     </p>
     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
     <button type="submit" class="btn">Log in</button>

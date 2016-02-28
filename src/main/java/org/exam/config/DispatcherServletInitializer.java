@@ -1,5 +1,6 @@
 package org.exam.config;
 
+import com.google.code.kaptcha.servlet.KaptchaServlet;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
@@ -7,6 +8,7 @@ import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatche
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
 
 /**
  * Created by xin on 15/1/7.
@@ -21,6 +23,8 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
         encodingFilter.setInitParameter("forceEncoding", "true");
         encodingFilter.setAsyncSupported(true);
         encodingFilter.addMappingForUrlPatterns(null, false, "/*");
+        ServletRegistration.Dynamic kaptchaServlet = servletContext.addServlet("kaptcha-servlet", KaptchaServlet.class);
+        kaptchaServlet.addMapping("/except/kaptcha");
     }
 
     @Override

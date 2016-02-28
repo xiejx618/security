@@ -1,3 +1,4 @@
+二.增加密码登录次数限制,记录上一次登录成功时间功能.
 1.配置认证提供者
 ```java
 @Override
@@ -87,3 +88,88 @@ public class CustomUserDetailsService implements UserDetailsService {
 }
 ```
 3.其它细节不再赘述
+二.增加验证码功能.增加一个Filter来处理验证码校验.
+```java
+@Override
+protected void configure(HttpSecurity http) throws Exception {
+    http.addFilterBefore(new KaptchaAuthenticationFilter("/login", "/login?error"), UsernamePasswordAuthenticationFilter.class)
+            .csrf().disable()
+            .authorizeRequests().anyRequest().authenticated()
+            .and().formLogin().loginPage("/login").failureUrl("/login?error").usernameParameter("username").passwordParameter("password").permitAll()
+            .and().logout().logoutUrl("/logout").permitAll();
+}
+```
+2.HttpSecurity有addFilterBefore,addFilterAfter,就没有replaceFilter(基于xml方式有<custom-filter position="FORM_LOGIN_FILTER" ref="multipleInputAuthenticationFilter" />),所以思路只能这么来.先看看KaptchaAuthenticationFilter
+```java
+package org.exam.security;
+import com.google.code.kaptcha.Constants;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+public class KaptchaAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+    private String servletPath;
+    public KaptchaAuthenticationFilter(String servletPath,String failureUrl) {
+        super(servletPath);
+        this.servletPath=servletPath;
+        setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(failureUrl));
+    }
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse res=(HttpServletResponse)response;
+        if ("POST".equalsIgnoreCase(req.getMethod())&&servletPath.equals(req.getServletPath())){
+            String expect = (String) req.getSession().getAttribute(Constants.KAPTCHA_SESSION_KEY);
+            if(expect!=null&&!expect.equalsIgnoreCase(req.getParameter("kaptcha"))){
+                unsuccessfulAuthentication(req, res, new InsufficientAuthenticationException("输入的验证码不正确"));
+                return;
+            }
+        }
+        chain.doFilter(request,response);
+    }
+
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
+        return null;
+    }
+}
+```
+这里使用kaptcha生成验证码,加入kaptcha依赖包
+```xml
+<dependency>
+    <groupId>com.github.penggle</groupId>
+    <artifactId>kaptcha</artifactId>
+    <version>2.3.2</version>
+</dependency>
+```
+3.配置servlet来生成验证码,org.exam.config.DispatcherServletInitializer.onStartup
+```java
+@Override
+public void onStartup(ServletContext servletContext) throws ServletException {
+    super.onStartup(servletContext);
+    FilterRegistration.Dynamic encodingFilter = servletContext.addFilter("encoding-filter", CharacterEncodingFilter.class);
+    encodingFilter.setInitParameter("encoding", "UTF-8");
+    encodingFilter.setInitParameter("forceEncoding", "true");
+    encodingFilter.setAsyncSupported(true);
+    encodingFilter.addMappingForUrlPatterns(null, false, "/*");
+    ServletRegistration.Dynamic kaptchaServlet = servletContext.addServlet("kaptcha-servlet", KaptchaServlet.class);
+    kaptchaServlet.addMapping("/except/kaptcha");
+}
+```
+同时将生成验证码的请求排除,不让security来拦截
+```java
+@Override
+public void configure(WebSecurity web) {
+    web.ignoring().antMatchers("/static/**","/except/**");
+}
+```
+4.页面加入验证码,然后测试
+```html
+<input type="text" id="kaptcha" name="kaptcha"/><img src="/testweb/except/kaptcha" width="80" height="25"/>
+```
+
