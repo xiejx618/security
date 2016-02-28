@@ -5,6 +5,7 @@ import org.exam.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class UserController {
     @Autowired
     private UserRepository userRepository;
-
+    @PreAuthorize("hasAuthority('user_query')")
     @RequestMapping("list")
     public String list(Model model, Pageable pageable) {
         Page<User> page = userRepository.findAll(pageable);

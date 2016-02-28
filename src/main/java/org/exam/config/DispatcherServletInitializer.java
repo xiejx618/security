@@ -29,12 +29,12 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
 
     @Override
     protected Class<?>[] getRootConfigClasses() {
-        return new Class<?>[]{AppConfig.class, SecurityConfig.class};
+        return new Class<?>[]{AppConfig.class, SecurityConfig.class,MvcConfig.class};
     }
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class<?>[]{MvcConfig.class};
+        return new Class<?>[]{};
     }
 
     @Override

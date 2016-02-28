@@ -259,4 +259,148 @@ public static void main(String[] args) {
 }
 ```
 最后当然测试啦.
+四.配置启用全局方法.
+1.使用@EnableGlobalMethodSecurity注解,并继承GlobalMethodSecurityConfiguration.因为需要AuthenticationManager,所以在前面将这个Bean暴露出来就得了,并配置一下没有权限抛403时的跳转页面.整理后如下:
+```java
+package org.exam.config;
+
+import org.exam.security.CustomAuthenticationProvider;
+import org.exam.security.CustomUserDetailsService;
+import org.exam.security.KaptchaAuthenticationFilter;
+import org.exam.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+/**
+ * Created by xin on 15/1/7.
+ */
+@Configuration
+public class SecurityConfig {
+    @Configuration
+    @EnableWebSecurity
+    static class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+        @Autowired
+        private UserService userService;
+
+        @Bean
+        public ReloadableResourceBundleMessageSource messageSource() {
+            //本地化(不完全)
+            ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+            messageSource.setBasename("classpath:org/springframework/security/messages");
+            return messageSource;
+        }
+
+        @Bean
+        public UserDetailsService userDetailsService() {
+            return new CustomUserDetailsService(userService);
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(4);//这里的strength为4-31位,设置成16都觉得编码有点慢了
+            return passwordEncoder;
+        }
+
+        //暴露AuthenticationManager注册成Bean供@EnableGlobalMethodSecurity使用
+        @Bean
+        @Override
+        public AuthenticationManager authenticationManagerBean() throws Exception {
+            return super.authenticationManagerBean();
+        }
+
+        @Override
+        protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+            DaoAuthenticationProvider authenticationProvider = new CustomAuthenticationProvider(userDetailsService(), userService);
+            authenticationProvider.setPasswordEncoder(passwordEncoder());
+            auth.authenticationProvider(authenticationProvider);
+        }
+
+        @Override
+        public void configure(WebSecurity web) {
+            web.ignoring().antMatchers("/static/**", "/except/**");
+        }
+
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http.addFilterBefore(new KaptchaAuthenticationFilter("/login", "/login?error"), UsernamePasswordAuthenticationFilter.class)
+                    .authorizeRequests().anyRequest().authenticated()
+                    .and().formLogin().loginPage("/login").failureUrl("/login?error").usernameParameter("username").passwordParameter("password").permitAll()
+                    .and().logout().logoutUrl("/logout").permitAll()
+                    .and().rememberMe().key("9D119EE5A2B7DAF6B4DC1EF871D0AC3C")
+                    .and().exceptionHandling().accessDeniedPage("/except/403");
+        }
+    }
+
+    @Configuration
+    @EnableGlobalMethodSecurity(prePostEnabled = true)
+    static class MethodSecurityConfig extends GlobalMethodSecurityConfiguration { }
+}
+```
+2./except/403请求一样应排除在拦截之外,还有转到那个页面渲染,在org.exam.config.MvcConfig.addViewControllers配置
+```java
+@Override
+public void addViewControllers(ViewControllerRegistry registry) {
+    registry.addViewController("/").setViewName("index");
+    registry.addViewController("/login").setViewName("login");
+    registry.addViewController("/except/403").setViewName("except/403");
+    registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
+}
+```
+3.在方法(类或接口上)添加注解来限制方法的访问.注解类注册的Bean所处的ApplicationContext应与@EnableGlobalMethodSecurity对应的ApplicationContext是同一个.
+因为把@EnableGlobalMethodSecurity放在org.exam.config.SecurityConfig.MethodSecurityConfig,而SecurityConfig放在RootApplicationContext,所以@PreAuthorize也应在RootApplicationContext.
+我们使用prePostEnabled(从参考文档介绍,要比securedEnabled和jsr250Enabled强大).例如:
+public interface UserService {
+    @PreAuthorize("hasAuthority('user_query')")
+    Page<User> findAll(Pageable pageable);
+    User save(User user);
+    User findOne(Long id);
+    void delete(Long id);
+}
+
+3.添加测试用户
+```java
+    @Test
+    @Rollback(false)
+    public void testSave() {
+        Authority authority1=new Authority();
+        authority1.setName("查看用户");
+        authority1.setAuthority("USER_QUERY");
+        authorityRepository.save(authority1);
+        Authority authority2=new Authority();
+        authority2.setName("保存用户");
+        authority2.setAuthority("USER_SAVE");
+        authorityRepository.save(authority2);
+        Authority authority3=new Authority();
+        authority3.setName("删除用户");
+        authority3.setAuthority("USER_DELETE");
+        authorityRepository.save(authority3);
+        Role role1=new Role();
+        role1.setName("管理员");
+        role1.setAuthorities(new HashSet<>(Arrays.asList(authority2, authority3)));
+        roleRepository.save(role1);
+        User user1=new User();
+        user1.setUsername("admin");
+        user1.setPassword("$2a$04$fCqcakHV2O.4AJgp3CIAGO9l5ZBq61Gt6YNzjcyC8M.js0ucpyun.");//admin
+        user1.setRoles(new HashSet<>(Arrays.asList(role1)));
+        userRepository.save(user1);
+    }
+```
+还有,参考文档有安全表达试的介绍,比如下面代表的意思:传入的联系人为当前的认证用户,才可以执行doSomething方法
+@PreAuthorize("#c.name == authentication.name")
+public void doSomething(@P("c")Contact contact);
+
 
