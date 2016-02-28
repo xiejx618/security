@@ -2,6 +2,7 @@ package org.exam.config;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
@@ -24,6 +25,7 @@ import java.util.Properties;
 @PropertySource("classpath:config.properties")
 @EnableTransactionManagement
 @EnableJpaRepositories(basePackages = {"org.exam.repository"})
+@ComponentScan(basePackages = "org.exam.service")
 public class AppConfig {
     @Resource
     private Environment env;

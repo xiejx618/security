@@ -43,6 +43,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Override
     @Transactional
     public User loadUserByUsername(String username) {
         User user;
@@ -54,7 +59,7 @@ public class UserServiceImpl implements UserService {
             }
             user.setAuthorities(authorities);
         } catch (Exception e) {
-            throw new RuntimeException("Username {" + username + "} not found");
+            return null;
         }
         return user;
     }

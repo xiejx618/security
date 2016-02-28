@@ -1,13 +1,19 @@
 package org.exam.config;
 
+import org.exam.security.CustomAuthenticationProvider;
+import org.exam.security.CustomUserDetailsService;
+import org.exam.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 /**
  * Created by xin on 15/1/7.
@@ -15,6 +21,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private UserService userService;
     @Bean
     public ReloadableResourceBundleMessageSource messageSource() {
         //本地化(不完全)
@@ -24,8 +32,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        //暂时使用基于内存的AuthenticationProvider
-        auth.inMemoryAuthentication().withUser("admin").password("admin").roles("USER");
+        UserDetailsService userDetailsService=new CustomUserDetailsService(userService);
+        AuthenticationProvider authenticationProvider=new CustomAuthenticationProvider(userDetailsService,userService);
+        auth.authenticationProvider(authenticationProvider);
     }
 
     @Override

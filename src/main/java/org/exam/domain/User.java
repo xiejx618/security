@@ -4,6 +4,7 @@ import org.exam.config.Constants;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,8 +21,10 @@ public class User implements Serializable {
     private String username;
     @Column(length = 64, nullable = false)
     private String password;
+    private int attempts;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastTime;
     private boolean enabled = true;
-    private boolean accountNonLocked = true;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = Constants.TABLE_PREFIX + "user_role")
     private Set<Role> roles = new HashSet<>();
@@ -52,20 +55,28 @@ public class User implements Serializable {
         this.password = password;
     }
 
+    public int getAttempts() {
+        return attempts;
+    }
+
+    public void setAttempts(int attempts) {
+        this.attempts = attempts;
+    }
+
     public boolean isEnabled() {
         return enabled;
     }
 
+    public Date getLastTime() {
+        return lastTime;
+    }
+
+    public void setLastTime(Date lastTime) {
+        this.lastTime = lastTime;
+    }
+
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    public boolean isAccountNonLocked() {
-        return accountNonLocked;
-    }
-
-    public void setAccountNonLocked(boolean accountNonLocked) {
-        this.accountNonLocked = accountNonLocked;
     }
 
     public Set<Role> getRoles() {

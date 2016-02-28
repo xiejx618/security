@@ -12,12 +12,9 @@
 <div><c:url value="/" var="indexUrl"/><a href="${indexUrl}">首页</a></div>
 <div><a href="add">添加</a></div>
 <table>
-    <tr><th>编号</th><th>用户名</th><th>密码</th><th>帐号是否过期</th><th>帐号是否锁定</th><th>凭证是否过期</th><th>是否启用</th><th>操作</th></tr>
+    <tr><th>编号</th><th>用户名</th><th>密码</th><th>密码尝试次数</th><th>是否启用</th><th>操作</th></tr>
     <c:forEach items="${page.content}" var="item">
-        <tr><td>${item.id}</td><td>${item.username}</td><td>${item.password}</td>
-            <td><c:choose><c:when test="${item.accountNonExpired}">否</c:when><c:otherwise>是</c:otherwise></c:choose></td>
-            <td><c:choose><c:when test="${item.accountNonLocked}">否</c:when><c:otherwise>是</c:otherwise></c:choose></td>
-            <td><c:choose><c:when test="${item.credentialsNonExpired}">否</c:when><c:otherwise>是</c:otherwise></c:choose></td>
+        <tr><td>${item.id}</td><td>${item.username}</td><td>${item.password}</td><td>${item.attempts}</td>
             <td><c:choose><c:when test="${item.enabled}">是</c:when><c:otherwise>否</c:otherwise></c:choose></td>
             <td><a href="update?id=${item.id}">修改</a>&nbsp;&nbsp;<a href="delete?id=${item.id}">删除</a></td></tr>
     </c:forEach>
