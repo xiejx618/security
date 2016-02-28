@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class UserController {
     @Autowired
     private UserRepository userRepository;
-    @PreAuthorize("hasAuthority('user_query')")
+    @PreAuthorize("hasAuthority('USER_QUERY')")
     @RequestMapping("list")
     public String list(Model model, Pageable pageable) {
         Page<User> page = userRepository.findAll(pageable);
