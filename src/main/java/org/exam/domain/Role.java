@@ -20,7 +20,7 @@ public class Role implements Serializable {
     private String name;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = Constants.TABLE_PREFIX + "role_authority")
-    private Set<Authority> authorities = new HashSet<Authority>();
+    private Set<Authority> authorities = new HashSet<>();
 
     public Long getId() {
         return id;

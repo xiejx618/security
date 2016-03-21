@@ -23,8 +23,7 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
         encodingFilter.setInitParameter("forceEncoding", "true");
         encodingFilter.setAsyncSupported(true);
         encodingFilter.addMappingForUrlPatterns(null, false, "/*");
-        ServletRegistration.Dynamic kaptchaServlet = servletContext.addServlet("kaptcha-servlet", KaptchaServlet.class);
-        kaptchaServlet.addMapping("/except/kaptcha");
+        servletContext.addServlet("kaptcha-servlet", KaptchaServlet.class).addMapping("/except/kaptcha");
     }
 
     @Override

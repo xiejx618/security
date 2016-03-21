@@ -15,10 +15,10 @@ import java.util.Date;
 /**
  * Created by xin on 16/2/28.
  */
-public class CustomAuthenticationProvider extends DaoAuthenticationProvider {
+public class AuthenticationProviderCustom extends DaoAuthenticationProvider {
     private final int MAX_ATTEMPTS=5;
     private final UserService userService;
-    public CustomAuthenticationProvider(UserDetailsService userDetailsService, UserService userService) {
+    public AuthenticationProviderCustom(UserDetailsService userDetailsService, UserService userService) {
         setUserDetailsService(userDetailsService);
         this.userService=userService;
     }

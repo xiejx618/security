@@ -50,19 +50,14 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User loadUserByUsername(String username) {
-        User user;
-        try {
-            user = userRepository.findByUsername(username);
+        User user=userRepository.findByUsername(username);
+        if (user!=null){
             Set<Authority> authorities = new HashSet<>();
             for (Role role : user.getRoles()) {
                 authorities.addAll(role.getAuthorities());
             }
             user.setAuthorities(authorities);
-        } catch (Exception e) {
-            return null;
         }
         return user;
     }
-
-
 }

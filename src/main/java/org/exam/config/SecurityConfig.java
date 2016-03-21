@@ -1,7 +1,7 @@
 package org.exam.config;
 
-import org.exam.security.CustomAuthenticationProvider;
-import org.exam.security.CustomUserDetailsService;
+import org.exam.security.AuthenticationProviderCustom;
+import org.exam.security.UserDetailsServiceCustom;
 import org.exam.security.KaptchaAuthenticationFilter;
 import org.exam.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,13 +44,12 @@ public class SecurityConfig {
 
         @Bean
         public UserDetailsService userDetailsService() {
-            return new CustomUserDetailsService(userService);
+            return new UserDetailsServiceCustom(userService);
         }
 
         @Bean
         public PasswordEncoder passwordEncoder() {
-            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(4);//这里的strength为4-31位,设置成16都觉得编码有点慢了
-            return passwordEncoder;
+            return new BCryptPasswordEncoder(4);//这里的strength为4-31位,设置成16都觉得编码有点慢了
         }
 
         //暴露AuthenticationManager注册成Bean供@EnableGlobalMethodSecurity使用
@@ -67,7 +66,7 @@ public class SecurityConfig {
 
         @Override
         protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-            DaoAuthenticationProvider authenticationProvider = new CustomAuthenticationProvider(userDetailsService(), userService);
+            DaoAuthenticationProvider authenticationProvider = new AuthenticationProviderCustom(userDetailsService(), userService);
             authenticationProvider.setPasswordEncoder(passwordEncoder());
             auth.authenticationProvider(authenticationProvider);
         }

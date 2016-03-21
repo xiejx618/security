@@ -5,12 +5,12 @@
 ```java
 @Override
 protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    UserDetailsService userDetailsService=new CustomUserDetailsService(userService);
-    AuthenticationProvider authenticationProvider=new CustomAuthenticationProvider(userDetailsService,userService);
+    UserDetailsService userDetailsService=new UserDetailsServiceCustom(userService);
+    AuthenticationProvider authenticationProvider=new AuthenticationProviderCustom(userDetailsService,userService);
     auth.authenticationProvider(authenticationProvider);
 }
 ```
-2.继承org.springframework.security.authentication.dao.DaoAuthenticationProvider自定义CustomAuthenticationProvider
+2.继承org.springframework.security.authentication.dao.DaoAuthenticationProvider自定义AuthenticationProviderCustom
 ```java
 package org.exam.security;
 
@@ -25,10 +25,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.Date;
-public class CustomAuthenticationProvider extends DaoAuthenticationProvider {
+public class AuthenticationProviderCustom extends DaoAuthenticationProvider {
     private final int MAX_ATTEMPTS=5;
     private final UserService userService;
-    public CustomAuthenticationProvider(UserDetailsService userDetailsService, UserService userService) {
+    public AuthenticationProviderCustom(UserDetailsService userDetailsService, UserService userService) {
         setUserDetailsService(userDetailsService);
         this.userService=userService;
     }
@@ -67,9 +67,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.HashSet;
 import java.util.Set;
-public class CustomUserDetailsService implements UserDetailsService {
+public class UserDetailsServiceCustom implements UserDetailsService {
     private final UserService userService;
-    public CustomUserDetailsService(UserService userService) {
+    public UserDetailsServiceCustom(UserService userService) {
         this.userService = userService;
     }
     @Override
@@ -196,14 +196,14 @@ protected void configure(HttpSecurity http) throws Exception {
 ```java
 @Bean
 public UserDetailsService userDetailsService(){
-    return new CustomUserDetailsService(userService);
+    return new UserDetailsServiceCustom(userService);
 }
 ```
 同时将AuthenticationManagerBuilder配置改一下
 ```java
 @Override
 protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    DaoAuthenticationProvider authenticationProvider=new CustomAuthenticationProvider(userDetailsService(),userService);
+    DaoAuthenticationProvider authenticationProvider=new AuthenticationProviderCustom(userDetailsService(),userService);
     auth.authenticationProvider(authenticationProvider);
 }
 ```
@@ -237,7 +237,7 @@ amount=100.00&routingNumber=1234&account=9876
 ```java
 @Override
 protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    DaoAuthenticationProvider authenticationProvider=new CustomAuthenticationProvider(userDetailsService(),userService);
+    DaoAuthenticationProvider authenticationProvider=new AuthenticationProviderCustom(userDetailsService(),userService);
     authenticationProvider.setPasswordEncoder(passwordEncoder());
     auth.authenticationProvider(authenticationProvider);
 }
@@ -264,8 +264,8 @@ public static void main(String[] args) {
 ```java
 package org.exam.config;
 
-import org.exam.security.CustomAuthenticationProvider;
-import org.exam.security.CustomUserDetailsService;
+import org.exam.security.AuthenticationProviderCustom;
+import org.exam.security.UserDetailsServiceCustom;
 import org.exam.security.KaptchaAuthenticationFilter;
 import org.exam.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -306,7 +306,7 @@ public class SecurityConfig {
 
         @Bean
         public UserDetailsService userDetailsService() {
-            return new CustomUserDetailsService(userService);
+            return new UserDetailsServiceCustom(userService);
         }
 
         @Bean
@@ -324,7 +324,7 @@ public class SecurityConfig {
 
         @Override
         protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-            DaoAuthenticationProvider authenticationProvider = new CustomAuthenticationProvider(userDetailsService(), userService);
+            DaoAuthenticationProvider authenticationProvider = new AuthenticationProviderCustom(userDetailsService(), userService);
             authenticationProvider.setPasswordEncoder(passwordEncoder());
             auth.authenticationProvider(authenticationProvider);
         }
