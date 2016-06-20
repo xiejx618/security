@@ -15,21 +15,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("session")
 public class SessionController {
-    private static final LogoutHandler logoutHandler=new SecurityContextLogoutHandler();
-
+    private static final LogoutHandler logoutHandler = new SecurityContextLogoutHandler();
 
 
     @Autowired
     private MongoSessionInfoRepo mongoSessionInfoRepo;
+
     @RequestMapping("list")
-    public String list(Model model){
+    public String list(Model model) {
         Iterable<SessionInfo> items = mongoSessionInfoRepo.findAll();
-        model.addAttribute("items",items);
+        model.addAttribute("items", items);
         return "session/list";
     }
 
     @RequestMapping("logout")
-    public String logout(String sid){
+    public String logout(String sid) {
         SessionInfo info = mongoSessionInfoRepo.findBySid(sid);
         info.setExpired(true);
         mongoSessionInfoRepo.save(info);

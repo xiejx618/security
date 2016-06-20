@@ -54,13 +54,13 @@ public class SessionRegistryImpl implements SessionRegistry, ApplicationListener
     @Override
     public SessionInformation getSessionInformation(String sessionId) {
         SessionInfo info = mongoSessionInfoRepo.findBySid(sessionId);
-        if (info!=null){
+        if (info != null) {
             SessionInformation information = new SessionInformation(info.getUid(), info.getSid(), info.getLastRequest());
-            if (info.isExpired()){
+            if (info.isExpired()) {
                 information.expireNow();
             }
             return information;
-        }else{
+        } else {
             return null;
         }
     }

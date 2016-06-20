@@ -19,13 +19,15 @@ import javax.annotation.Resource;
 public class HttpSessionConfig {
     @Resource
     private Environment env;
+
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
         JedisConnectionFactory connectionFactory = new JedisConnectionFactory();
         connectionFactory.setHostName(env.getProperty("redis.host"));
-        connectionFactory.setPort(env.getProperty("redis.port",Integer.class));
+        connectionFactory.setPort(env.getProperty("redis.port", Integer.class));
         return connectionFactory;
     }
+
     @Bean
     public HttpSessionEventPublisher httpSessionEventPublisher() {
         return new HttpSessionEventPublisher();

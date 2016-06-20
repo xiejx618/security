@@ -9,7 +9,10 @@ import java.util.List;
  */
 public interface MongoSessionInfoRepo extends MongoBaseRepo<SessionInfo> {
     SessionInfo findBySid(String sid);
+
     List<SessionInfo> findByUid(String uid);
-    List<SessionInfo> findByUidAndExpired(String uid,boolean expired);
+
+    List<SessionInfo> findByUidAndExpired(String uid, boolean expired);
+
     void deleteBySid(String sid);
 }

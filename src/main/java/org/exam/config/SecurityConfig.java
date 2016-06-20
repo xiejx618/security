@@ -32,6 +32,7 @@ public class SecurityConfig {
     protected static class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         @Autowired
         private UserService userService;
+
         @Bean
         public UserDetailsService userDetailsService() {
             return new UserDetailsServiceImpl(userService);
