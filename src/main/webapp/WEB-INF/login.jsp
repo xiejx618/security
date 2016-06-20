@@ -5,8 +5,8 @@
     <title>test</title>
 </head>
 <body>
-<c:url value="/login" var="loginUrl"/>
-<form action="${loginUrl}" method="post">
+<c:url value="" var="loginUrl"/>
+<form action="${pageContext.servletContext.contextPath}/login" method="post">
     <c:if test="${SPRING_SECURITY_LAST_EXCEPTION.message != null}">
         <p>
            ${SPRING_SECURITY_LAST_EXCEPTION.message}
@@ -24,11 +24,6 @@
     <p>
         <label for="password">Password</label>
         <input type="password" id="password" name="password" value="admin"/>
-    </p>
-    <p>
-        <label for="kaptcha">Kaptcha</label>
-        <c:url value="/except/kaptcha" var="kaptcha"/>
-        <input type="text" id="kaptcha" name="kaptcha"/><img src="${kaptcha}" width="80" height="25"/>
     </p>
     <p>
         <input type="checkbox" name="remember-me" value="true"/>Remember me

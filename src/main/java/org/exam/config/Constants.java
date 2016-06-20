@@ -1,8 +1,8 @@
 package org.exam.config;
 
 /**
- * Created by xin on 16/2/28.
+ * Created on 16/2/28.
  */
 public abstract class Constants {
-    public static final String TABLE_PREFIX = "o_";
+    public static final String TABLE_PREFIX = "t_";
 }

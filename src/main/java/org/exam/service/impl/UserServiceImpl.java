@@ -1,9 +1,9 @@
 package org.exam.service.impl;
 
-import org.exam.domain.Authority;
-import org.exam.domain.Role;
-import org.exam.domain.User;
-import org.exam.repository.UserRepository;
+import org.exam.domain.entity.Authority;
+import org.exam.domain.entity.Role;
+import org.exam.domain.entity.User;
+import org.exam.repository.jpa.JpaUserRepo;
 import org.exam.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,43 +15,43 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by xin on 15/1/14.
+ * Created on 15/1/14.
  */
 @Service
 public class UserServiceImpl implements UserService {
     @Autowired
-    private UserRepository userRepository;
+    private JpaUserRepo jpaUserRepo;
 
     @Override
     public Page<User> findAll(Pageable pageable) {
-        return userRepository.findAll(pageable);
+        return jpaUserRepo.findAll(pageable);
     }
 
     @Override
     public User save(User user) {
-        return userRepository.save(user);
+        return jpaUserRepo.save(user);
     }
 
     @Override
     public User findOne(Long id) {
-        return userRepository.findOne(id);
+        return jpaUserRepo.findOne(id);
     }
 
     @Override
     public void delete(Long id) {
-        userRepository.delete(id);
+        jpaUserRepo.delete(id);
     }
 
     @Override
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return jpaUserRepo.findByUsername(username);
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public User loadUserByUsername(String username) {
-        User user=userRepository.findByUsername(username);
-        if (user!=null){
+        User user = jpaUserRepo.findByUsername(username);
+        if (user != null) {
             Set<Authority> authorities = new HashSet<>();
             for (Role role : user.getRoles()) {
                 authorities.addAll(role.getAuthorities());

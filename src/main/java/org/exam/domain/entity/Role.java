@@ -1,4 +1,4 @@
-package org.exam.domain;
+package org.exam.domain.entity;
 
 import org.exam.config.Constants;
 
@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by xin on 15/1/12.
+ * Created on 15/1/12.
  */
 @Entity
 @Table(name = Constants.TABLE_PREFIX + "role")

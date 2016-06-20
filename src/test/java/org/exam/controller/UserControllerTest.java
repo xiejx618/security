@@ -16,7 +16,7 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.annotation.Resource;
 
 /**
- * Created by xin on 14/10/17.
+ * Created on 14/10/17.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration

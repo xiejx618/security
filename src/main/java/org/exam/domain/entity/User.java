@@ -1,4 +1,4 @@
-package org.exam.domain;
+package org.exam.domain.entity;
 
 import org.exam.config.Constants;
 
@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by xin on 15/1/7.
+ * Created on 15/1/7.
  */
 @Entity
 @Table(name = Constants.TABLE_PREFIX + "user")
@@ -23,7 +23,8 @@ public class User implements Serializable {
     private String password;
     private int attempts;
     @Temporal(TemporalType.TIMESTAMP)
-    private Date lastTime;
+    private Date loginTime;
+    private long lockTime;
     private boolean enabled = true;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = Constants.TABLE_PREFIX + "user_role")
@@ -67,12 +68,20 @@ public class User implements Serializable {
         return enabled;
     }
 
-    public Date getLastTime() {
-        return lastTime;
+    public Date getLoginTime() {
+        return loginTime;
     }
 
-    public void setLastTime(Date lastTime) {
-        this.lastTime = lastTime;
+    public void setLoginTime(Date loginTime) {
+        this.loginTime = loginTime;
+    }
+
+    public long getLockTime() {
+        return lockTime;
+    }
+
+    public void setLockTime(long lockTime) {
+        this.lockTime = lockTime;
     }
 
     public void setEnabled(boolean enabled) {

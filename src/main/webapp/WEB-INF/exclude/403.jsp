@@ -5,6 +5,8 @@
     <title>test</title>
 </head>
 <body>
-403
+403页面
+
+${SPRING_SECURITY_403_EXCEPTION}
 </body>
 </html>

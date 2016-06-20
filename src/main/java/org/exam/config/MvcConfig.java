@@ -14,7 +14,7 @@ import org.springframework.web.servlet.config.annotation.*;
 import java.util.List;
 
 /**
- * Created by xin on 15/1/7.
+ * Created on 15/1/7.
  */
 @Configuration
 @ComponentScan(basePackages = {"org.exam.web"})
@@ -35,13 +35,13 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/").setViewName("index");
         registry.addViewController("/login").setViewName("login");
-        registry.addViewController("/except/403").setViewName("except/403");
+        registry.addViewController("/exclude/403").setViewName("exclude/403");
         registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
     }
 
     @Override
     public void configureViewResolvers(ViewResolverRegistry registry) {
-        registry.jsp("/WEB-INF/",".jsp");
+        registry.jsp("/WEB-INF/", ".jsp");
     }
 
     @Bean

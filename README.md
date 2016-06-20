@@ -14,7 +14,7 @@ protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 ```java
 package org.exam.security;
 
-import org.exam.domain.User;
+import User;
 import org.exam.service.UserService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
@@ -56,8 +56,8 @@ public class AuthenticationProviderCustom extends DaoAuthenticationProvider {
 ```java
 package org.exam.security;
 
-import org.exam.domain.Authority;
-import org.exam.domain.User;
+import Authority;
+import User;
 import org.exam.service.UserService;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -160,19 +160,19 @@ public void onStartup(ServletContext servletContext) throws ServletException {
     encodingFilter.setAsyncSupported(true);
     encodingFilter.addMappingForUrlPatterns(null, false, "/*");
     ServletRegistration.Dynamic kaptchaServlet = servletContext.addServlet("kaptcha-servlet", KaptchaServlet.class);
-    kaptchaServlet.addMapping("/except/kaptcha");
+    kaptchaServlet.addMapping("/exclude/kaptcha");
 }
 ```
 同时将生成验证码的请求排除,不让security来拦截
 ```java
 @Override
 public void configure(WebSecurity web) {
-    web.ignoring().antMatchers("/static/**","/except/**");
+    web.ignoring().antMatchers("/static/**","/exclude/**");
 }
 ```
 4.页面加入验证码,然后测试
 ```html
-<input type="text" id="kaptcha" name="kaptcha"/><img src="/testweb/except/kaptcha" width="80" height="25"/>
+<input type="text" id="kaptcha" name="kaptcha"/><img src="/testweb/exclude/kaptcha" width="80" height="25"/>
 ```
 三.启用CSRF,加入记住我和增强密码功能
 1.启用CSRF.一旦启用,那些Action为PATCH, POST, PUT, and DELETE的请求(包含登录和登出)都要附加CSRF Token提交到服务端.还有,登出也要使用POST(参考官方文档,当然可改为GET,但不推荐).
@@ -286,7 +286,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 /**
- * Created by xin on 15/1/7.
+ * Created on 15/1/7.
  */
 @Configuration
 public class SecurityConfig {
@@ -331,7 +331,7 @@ public class SecurityConfig {
 
         @Override
         public void configure(WebSecurity web) {
-            web.ignoring().antMatchers("/static/**", "/except/**");
+            web.ignoring().antMatchers("/static/**", "/exclude/**");
         }
 
         @Override
@@ -341,7 +341,7 @@ public class SecurityConfig {
                     .and().formLogin().loginPage("/login").failureUrl("/login?error").usernameParameter("username").passwordParameter("password").permitAll()
                     .and().logout().logoutUrl("/logout").permitAll()
                     .and().rememberMe().key("9D119EE5A2B7DAF6B4DC1EF871D0AC3C")
-                    .and().exceptionHandling().accessDeniedPage("/except/403");
+                    .and().exceptionHandling().accessDeniedPage("/exclude/403");
         }
     }
 
@@ -350,13 +350,13 @@ public class SecurityConfig {
     static class MethodSecurityConfig extends GlobalMethodSecurityConfiguration { }
 }
 ```
-2./except/403请求一样应排除在拦截之外,还有转到那个页面渲染,在org.exam.config.MvcConfig.addViewControllers配置
+2./exclude/403请求一样应排除在拦截之外,还有转到那个页面渲染,在org.exam.config.MvcConfig.addViewControllers配置
 ```java
 @Override
 public void addViewControllers(ViewControllerRegistry registry) {
     registry.addViewController("/").setViewName("index");
     registry.addViewController("/login").setViewName("login");
-    registry.addViewController("/except/403").setViewName("except/403");
+    registry.addViewController("/exclude/403").setViewName("exclude/403");
     registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
 }
 ```
@@ -428,7 +428,7 @@ protected void configure(HttpSecurity http) throws Exception {
             .and().formLogin().loginPage("/login").failureUrl("/login?error").usernameParameter("username").passwordParameter("password").permitAll()
             .and().logout().logoutUrl("/logout").permitAll()
             .and().rememberMe().key("9D119EE5A2B7DAF6B4DC1EF871D0AC3C")
-            .and().exceptionHandling().accessDeniedPage("/except/403")
+            .and().exceptionHandling().accessDeniedPage("/exclude/403")
             .and().sessionManagement().maximumSessions(2).expiredUrl("/login?expired").sessionRegistry(sessionRegistry());
 }
 ```
